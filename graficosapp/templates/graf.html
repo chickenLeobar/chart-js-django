@@ -1,0 +1,80 @@
+{% extends 'base.html' %} {% load static %}
+<!-- prettier-ignore -->
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <h1 class="text-center w-100 title">Covid tracker</h1>
+  </div>
+  <div class="row">
+    <div class="col-md-5">
+      <ul class="list-group w-75">
+        <!-- prettier-ignore -->
+        {% for countrie in countries %}
+        <li
+          class="list-group-item list-group-item-action me-auto select_item"
+          data-id="{{countrie.ID}}"
+          data-countrie="{{countrie.Country}}"
+        >
+          {{countrie.Country}}
+          <span class="badge bg-danger rounded-pill ml-3">
+            <b>{{countrie.TotalConfirmed}}</b>
+          </span>
+        </li>
+
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="col-md-6 text-left">
+      <div class="card p-4">
+        <div class="card-title">
+          <h3 id="scope"></h3>
+        </div>
+        <canvas id="myChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+<!-- prettier-ignore -->
+{% block extrascripts %}
+
+<script
+  type="text/javascript"
+  src="http://code.jquery.com/jquery-1.10.0.min.js"
+></script>
+<script type="text/javascript" src="{% static 'js/Chart.min.js' %}"></script>
+
+{% comment %}
+<script src="{% static 'js/main.js' %}"></script>
+{% endcomment %}
+
+<script type="text/javascript">
+  function selectScope(scope) {
+    document.getElementById("scope").innerText = scope;
+  }
+  selectScope("En todo el Mundo");
+  function getData(scope) {
+    $.get(`chartjs/${scope}`, function (data) {
+      var ctx = $("#myChart").get(0).getContext("2d");
+      new Chart(ctx, {
+        type: "pie",
+        data: data,
+      });
+    });
+  }
+  getData("general");
+  document.querySelectorAll(".select_item").forEach((li) => {
+    li.addEventListener("click", (evt) => {
+      console.log(evt);
+      let target = evt.target;
+      const countrie = target.dataset.id;
+      const countrieLabel = target.dataset.countrie;
+      selectScope(countrieLabel);
+      getData(countrie);
+    });
+  });
+</script>
+
+{% endblock extrascripts %}
